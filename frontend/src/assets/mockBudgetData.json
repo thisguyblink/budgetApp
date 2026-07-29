@@ -1,0 +1,65 @@
+{
+  "nodes": [
+    { "id": "Salary" },
+    { "id": "Freelance" },
+    { "id": "Investment Income" },
+
+    { "id": "Total Income" },
+
+    { "id": "Housing" },
+    { "id": "Food" },
+    { "id": "Transport" },
+    { "id": "Loans" },
+    { "id": "Investments" },
+    { "id": "Discretionary" },
+    { "id": "Savings" },
+
+    { "id": "Rent" },
+    { "id": "Utilities" },
+
+    { "id": "Groceries" },
+    { "id": "Dining Out" },
+
+    { "id": "Student Loan" },
+    { "id": "Car Loan" },
+    { "id": "Credit Card" },
+
+    { "id": "401k" },
+    { "id": "Index Funds" },
+    { "id": "Emergency Fund" },
+
+    { "id": "Entertainment" },
+    { "id": "Shopping" }
+  ],
+
+  "links": [
+    { "source": "Salary", "target": "Total Income", "value": 5200 },
+    { "source": "Freelance", "target": "Total Income", "value": 800 },
+    { "source": "Investment Income", "target": "Total Income", "value": 150 },
+
+    { "source": "Total Income", "target": "Housing", "value": 1800 },
+    { "source": "Total Income", "target": "Food", "value": 700 },
+    { "source": "Total Income", "target": "Transport", "value": 400 },
+    { "source": "Total Income", "target": "Loans", "value": 950 },
+    { "source": "Total Income", "target": "Investments", "value": 900 },
+    { "source": "Total Income", "target": "Discretionary", "value": 600 },
+    { "source": "Total Income", "target": "Savings", "value": 400 },
+
+    { "source": "Housing", "target": "Rent", "value": 1500 },
+    { "source": "Housing", "target": "Utilities", "value": 300 },
+
+    { "source": "Food", "target": "Groceries", "value": 450 },
+    { "source": "Food", "target": "Dining Out", "value": 250 },
+
+    { "source": "Loans", "target": "Student Loan", "value": 450 },
+    { "source": "Loans", "target": "Car Loan", "value": 350 },
+    { "source": "Loans", "target": "Credit Card", "value": 150 },
+
+    { "source": "Investments", "target": "401k", "value": 400 },
+    { "source": "Investments", "target": "Index Funds", "value": 350 },
+    { "source": "Investments", "target": "Emergency Fund", "value": 150 },
+
+    { "source": "Discretionary", "target": "Entertainment", "value": 250 },
+    { "source": "Discretionary", "target": "Shopping", "value": 350 }
+  ]
+}

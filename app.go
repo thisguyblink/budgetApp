@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/csv"
 	"log"
 	"slices"
@@ -9,6 +10,9 @@ import (
 	"strings"
 	"time"
 )
+
+var dbCon *sql.DB
+var err error
 
 // App struct
 type App struct {
@@ -42,9 +46,17 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	dbCon, err = startDb()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-func (b *App) shutdown(ctx context.Context) {}
+func (b *App) shutdown(ctx context.Context) {
+	if dbCon != nil {
+		dbCon.Close()
+	}
+}
 
 func (a *App) ParseCsv(content string) ([]Transaction, error) {
 	reader := csv.NewReader(strings.NewReader(content))
@@ -102,6 +114,16 @@ func (a *App) ParseTransactionsRange(transactions []Transaction, after string, b
 
 }
 
-func (a *App) GroupTransactionsCategory(transactions []Transaction) ([]Transaction, error) {
-
+func (a *App) GroupTransactionsCategory(transactions []Transaction) (map[string][]Transaction, map[string]float64, error) {
+	transactionGroups := make(map[string][]Transaction)
+	groupInfo := make(map[string]float64)
+	for _, transaction := range transactions {
+		transactionGroups[transaction.Category] = append(transactionGroups[transaction.Category], transaction)
+		if _, ok := groupInfo[transaction.Category]; ok {
+			groupInfo[transaction.Category] = groupInfo[transaction.Category] + transaction.Amount
+		} else {
+			groupInfo[transaction.Category] = transaction.Amount
+		}
+	}
+	return transactionGroups, groupInfo, nil
 }

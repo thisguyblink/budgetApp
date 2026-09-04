@@ -1,5 +1,8 @@
 <script>
+// @ts-nocheck
+
     import { ParseCsv } from '../../wailsjs/go/main/App';
+    import { ClearTransactions } from "../../wailsjs/go/main/App";
 
     let transactions = []
     let error
@@ -16,8 +19,7 @@
                     error = 'Failed to read file as text';
                     return;
                 }
-                transactions = await ParseCsv(reader.result);
-                console.log(transactions);
+                error = await ParseCsv(reader.result);
             } catch (err) {
                 error = err.message || String(err);
             }
@@ -30,14 +32,12 @@
 </script>
 
 <input type="file" id="csvFileInput" accept=".csv" on:change={handleFileChange} />
-
+<button onclick={ClearTransactions}>ClearTransactions</button>
 {#if error}
     <p class="error">{error}</p>
+    {:else}
+    <p>No Errors with Upload</p>
 {/if}
-{#if transactions.length}
-    <ul>
-        {#each transactions as t}
-            <li>{t.Date} — {t.Description} ({t.Category}): {t.Amount.toFixed(2)}</li>
-        {/each}
-    </ul>
-{/if}
+
+
+

@@ -1,13 +1,15 @@
 <script>
     import Chart from 'chart.js/auto';
-    import {onMount} from "svelte";
 
-    import { GetCategoryInfo } from '../../wailsjs/go/main/App';
+    import { GetCategoryTotals } from '../../wailsjs/go/main/App';
+    import { GetTotalSpending } from '../../wailsjs/go/main/App';
 
     let donutCanvas;
     let chartInstance;
-    let info;
-    let data;
+    let totalSpending = 0;
+    let categoryTotals = {};
+    let loading = false;
+    let error = null;
 
     const colors = [
         'rgb(255, 99, 132)',
@@ -18,34 +20,78 @@
         'rgb(255, 159, 64)'
     ];
 
+    // sort by amount descending, recalculates whenever categoryTotals changes
+    $: sortedCategories = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
+
     async function getCategoryInfo() {
-        const info = await GetCategoryInfo();
+        loading = true;
+        error = null;
+        try {
+            const totals = await GetCategoryTotals();
+            totalSpending = await GetTotalSpending();
+            categoryTotals = totals;
 
-        const data = {
-            labels: info.map(c => c.Category),
-            datasets: [{
-                label: 'Spending by Category',
-                data: info.map(c => c.Amount),
-                backgroundColor: info.map((_, i) => colors[i % colors.length]),
-                hoverOffset: 4
-            }]
-        };
+            // use the same sorted order for the chart so slice colors match the list
+            const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
 
-        chartInstance = new Chart(donutCanvas, {
-            type: "doughnut",
-            data: data,
-        });
+            const data = {
+                labels: sorted.map(([category]) => category),
+                datasets: [{
+                    label: 'Spending by Category',
+                    data: sorted.map(([, amount]) => amount),
+                    backgroundColor: sorted.map((_, i) => colors[i % colors.length]),
+                    hoverOffset: 4
+                }]
+            };
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(donutCanvas, {
+                type: "doughnut",
+                data: data,
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        } catch (err) {
+            error = err;
+            console.error(err);
+        } finally {
+            loading = false;
+        }
     }
-
-    onMount(() => {
-        getCategoryInfo()
-    });
-
 </script>
+
 <div class="page">
+    <h1>Personal Budget</h1>
+    <button on:click={getCategoryInfo} disabled={loading}>
+        {loading ? 'Loading...' : 'Load Data'}
+    </button>
+    {#if error}
+        <p class="error">{error}</p>
+    {:else}
+        <p>Total Spending: ${totalSpending.toFixed(2)}</p>
+    {/if}
+
     <div class="donut">
         <canvas bind:this={donutCanvas}></canvas>
     </div>
+
+    <ul class="category-list">
+        {#each sortedCategories as [category, amount], i}
+            <li>
+                <span class="swatch" style="background-color: {colors[i % colors.length]}"></span>
+                <span class="label">{category}</span>
+                <span class="amount">${amount.toFixed(2)}</span>
+            </li>
+        {/each}
+    </ul>
 </div>
 
 <style>
@@ -53,14 +99,38 @@
         height: 75vh;
         width: 90vw;
         display: flex;
-        flex-direction: row;
-        justify-content: center;
+        flex-direction: column;
         align-items: stretch;
+        overflow-y: auto;
     }
     .donut {
-        position: relative; /* Chart.js absolutely-positions the canvas inside its parent when responsive */
+        position: relative;
+        flex: 1;
         width: 100%;
-        height: 100%;
-        /*height: 500px; !* a concrete height — height: 100% only works if every ancestor up the tree also has one *!*/
+        min-height: 300px;
+    }
+    .category-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .category-list li {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .label {
+        flex: 1;
+    }
+    .amount {
+        font-variant-numeric: tabular-nums;
     }
 </style>

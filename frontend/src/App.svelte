@@ -11,8 +11,6 @@
 </script>
 
 <div class="app">
-  <div>Sidebar</div>
-
   <div class="page-header">
   <button on:click={() => currentPage = "home"}>Home</button>
   <button on:click={() => currentPage = "uploadFile"}>Upload Files</button>
@@ -48,12 +46,13 @@
     overflow: hidden; /* prevents the whole app from scrolling; individual panels can opt into their own scroll */
   }
   .page-header {
-    height: 20vh;
+    height: 10vh;
     width: 90vw;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-
+    border: aquamarine 2px solid;
   }
+
 </style>

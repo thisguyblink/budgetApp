@@ -98,3 +98,10 @@ func (a *App) GetTransactions() ([]Transaction, error) {
 	}
 	return transactions, rows.Err()
 }
+
+func (a *App) ClearTransactions() error {
+	_, err := dbCon.ExecContext(a.ctx,
+		`DELETE FROM Transactions`,
+	)
+	return err
+}

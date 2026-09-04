@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/csv"
+	"fmt"
 	"log"
 	"slices"
 	"strconv"
@@ -13,6 +14,7 @@ import (
 
 var dbCon *sql.DB
 var err error
+var totalSpending float64
 
 // App struct
 type App struct {
@@ -58,12 +60,12 @@ func (b *App) shutdown(ctx context.Context) {
 	}
 }
 
-func (a *App) ParseCsv(content string) ([]Transaction, error) {
+func (a *App) ParseCsv(content string) error {
 	reader := csv.NewReader(strings.NewReader(content))
 	records, err := reader.ReadAll()
 	if err != nil {
 		log.Fatalf("Failed to parse CSV: %s", err)
-		return nil, err
+		return err
 	}
 
 	var transactions []Transaction
@@ -74,7 +76,7 @@ func (a *App) ParseCsv(content string) ([]Transaction, error) {
 		price, err := strconv.ParseFloat(record[5], 64)
 		if err != nil {
 			log.Fatal(err)
-			return nil, err
+			return err
 		}
 		layout := "01/01/2006"
 
@@ -90,20 +92,21 @@ func (a *App) ParseCsv(content string) ([]Transaction, error) {
 		transactions = append(transactions, transaction)
 	}
 
-	return transactions, nil
+	err = a.InsertTransactions(transactions)
+	return err
 }
 
-func (a *App) ParseTransactionsRange(transactions []Transaction, after string, before string) ([]Transaction, error) {
-	parsedBeforeDate, err := time.Parse("01/01/2006", before)
+func (a *App) ParseTransactionsRange(after string, before string) ([]Transaction, error) {
+	parsedBeforeDate, err := time.Parse("1/01/2006", before)
 	if err != nil {
 		return nil, err
 	}
 	// if there is no after date the front end will send 01/01/1900 to be safe
-	parsedAfterDate, err := time.Parse("01/01/2006", after)
+	parsedAfterDate, err := time.Parse("1/01/2006", after)
 	if err != nil {
 		return nil, err
 	}
-
+	transactions, err := a.GetTransactions() // db call
 	for index, transaction := range transactions {
 		if transaction.Date.After(parsedBeforeDate) || transaction.Date.Before(parsedAfterDate) {
 			transactions = slices.Delete(transactions, index, index+1)
@@ -114,20 +117,33 @@ func (a *App) ParseTransactionsRange(transactions []Transaction, after string, b
 
 }
 
-func (a *App) GetCategoryInfo() (map[string][]Transaction, map[string]float64, error) {
+func (a *App) GetCategoryTotals() (map[string]float64, error) {
+	totalSpending = 0
+	ignoreCategory := map[string]bool{
+		"Buy":                 true,
+		"Credit Card Payment": true,
+		"Federal Tax":         true,
+		"Fees & Charges":      true,
+		"Transfer":            true,
+		"Income":              true,
+	}
 	transactions, err := a.GetTransactions()
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to get transactions: %w", err)
 	}
-	transactionGroups := make(map[string][]Transaction)
+
 	groupInfo := make(map[string]float64)
 	for _, transaction := range transactions {
-		transactionGroups[transaction.Category] = append(transactionGroups[transaction.Category], transaction)
-		if _, ok := groupInfo[transaction.Category]; ok {
-			groupInfo[transaction.Category] = groupInfo[transaction.Category] + transaction.Amount
-		} else {
-			groupInfo[transaction.Category] = transaction.Amount
+		if ignoreCategory[transaction.Category] {
+			continue
 		}
+		groupInfo[transaction.Category] += transaction.Amount
+		totalSpending += transaction.Amount
 	}
-	return transactionGroups, groupInfo, nil
+
+	return groupInfo, nil
+}
+
+func (a *App) GetTotalSpending() float64 {
+	return totalSpending
 }

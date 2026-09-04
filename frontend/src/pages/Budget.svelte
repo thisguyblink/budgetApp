@@ -2,35 +2,43 @@
     import Chart from 'chart.js/auto';
     import {onMount} from "svelte";
 
-    import { GroupTransactionsCategory } from '../../wailsjs/go/main/App';
+    import { GetCategoryInfo } from '../../wailsjs/go/main/App';
 
     let donutCanvas;
     let chartInstance;
-    let categoryInfo;
+    let info;
+    let data;
 
-    const data = {
-        labels: [
-            'Red',
-            'Blue',
-            'Yellow'
-        ],
-        datasets: [{
-            label: 'My First Dataset',
-            data: [300, 50, 100],
-            backgroundColor: [
-                'rgb(255, 99, 132)',
-                'rgb(54, 162, 235)',
-                'rgb(255, 205, 86)'
-            ],
-            hoverOffset: 4
-        }]
-    };
+    const colors = [
+        'rgb(255, 99, 132)',
+        'rgb(54, 162, 235)',
+        'rgb(255, 205, 86)',
+        'rgb(75, 192, 192)',
+        'rgb(153, 102, 255)',
+        'rgb(255, 159, 64)'
+    ];
 
-    onMount(() => {
+    async function getCategoryInfo() {
+        const info = await GetCategoryInfo();
+
+        const data = {
+            labels: info.map(c => c.Category),
+            datasets: [{
+                label: 'Spending by Category',
+                data: info.map(c => c.Amount),
+                backgroundColor: info.map((_, i) => colors[i % colors.length]),
+                hoverOffset: 4
+            }]
+        };
+
         chartInstance = new Chart(donutCanvas, {
             type: "doughnut",
             data: data,
-        })
+        });
+    }
+
+    onMount(() => {
+        getCategoryInfo()
     });
 
 </script>

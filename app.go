@@ -114,7 +114,11 @@ func (a *App) ParseTransactionsRange(transactions []Transaction, after string, b
 
 }
 
-func (a *App) GroupTransactionsCategory(transactions []Transaction) (map[string][]Transaction, map[string]float64, error) {
+func (a *App) GetCategoryInfo() (map[string][]Transaction, map[string]float64, error) {
+	transactions, err := a.GetTransactions()
+	if err != nil {
+		log.Fatal(err)
+	}
 	transactionGroups := make(map[string][]Transaction)
 	groupInfo := make(map[string]float64)
 	for _, transaction := range transactions {

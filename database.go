@@ -99,9 +99,10 @@ func (a *App) GetTransactions() ([]Transaction, error) {
 	return transactions, rows.Err()
 }
 
-func (a *App) ClearTransactions() error {
+func (a *App) ClearTransactionsTable() error {
 	_, err := dbCon.ExecContext(a.ctx,
 		`DELETE FROM Transactions`,
 	)
+	log.Println("Clearing table transactions")
 	return err
 }

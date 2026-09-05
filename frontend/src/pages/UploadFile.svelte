@@ -2,7 +2,7 @@
 // @ts-nocheck
 
     import { ParseCsv } from '../../wailsjs/go/main/App';
-    import { ClearTransactions } from "../../wailsjs/go/main/App";
+    import { ClearTransactionsTable } from "../../wailsjs/go/main/App";
 
     let transactions = []
     let error
@@ -32,7 +32,7 @@
 </script>
 
 <input type="file" id="csvFileInput" accept=".csv" on:change={handleFileChange} />
-<button onclick={ClearTransactions}>ClearTransactions</button>
+<button on:click={ClearTransactionsTable}>ClearTransactions</button>
 {#if error}
     <p class="error">{error}</p>
     {:else}

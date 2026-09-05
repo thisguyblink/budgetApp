@@ -1,6 +1,19 @@
-<div>
-    <h1>Budget App</h1>
-    <ul> Page List
-        <li></li>
-    </ul>
+<script>
+    let estimatedMonthlyIncome
+    let currentMonthlyIncome
+    let totalInvestments
+    let totalDebt
+    let periodSpending
+    let periodSpendingByCategory
+
+
+</script>
+
+
+<div class="dashboard">
+
+
+
+
+
 </div>

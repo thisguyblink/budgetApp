@@ -57,8 +57,8 @@
         border: aquamarine 2px solid;
     }
     .page {
-        display: flex;
-
+        height: 100vh;
+        width: 90vw;
     }
 
 </style>

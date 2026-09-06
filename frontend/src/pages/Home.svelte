@@ -11,12 +11,33 @@
     let startYear = 2026
     let endMonth = 9
     let endYear = 2026
+
+    function SetAllTime() {
+        startMonth = 1
+        startYear = 2000
+        endMonth = 12
+        endYear = 2026
+    }
+    function SetYtd() {
+        startMonth = 1
+        startYear = 2026
+        endMonth = 9
+        endYear = 2026
+    }
+    function SetThisMonth() {
+        startMonth = 9
+        startYear = 2026
+        endMonth = 9
+        endYear = 2026
+    }
 </script>
 
 <div class="home-page">
     <h1>Home Dashboard</h1>
     <div class="dashboard">
-
+        <button on:click={SetAllTime}>All Time</button>
+        <button on:click={SetYtd}>Year-To-Date</button>
+        <button on:click={SetThisMonth}>This Month</button>
         <label for="month">Start Date</label>
         <select name="month" id="month" bind:value={startMonth}>
             <option value={1}>January</option>

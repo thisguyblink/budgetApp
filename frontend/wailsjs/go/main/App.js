@@ -6,8 +6,8 @@ export function ClearTransactionsTable() {
   return window['go']['main']['App']['ClearTransactionsTable']();
 }
 
-export function GetCategoryTotals() {
-  return window['go']['main']['App']['GetCategoryTotals']();
+export function GetCategoryTotals(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['GetCategoryTotals'](arg1, arg2, arg3, arg4);
 }
 
 export function GetTotalSpending() {
@@ -16,6 +16,10 @@ export function GetTotalSpending() {
 
 export function GetTransactions() {
   return window['go']['main']['App']['GetTransactions']();
+}
+
+export function GetTransactionsRange(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['GetTransactionsRange'](arg1, arg2, arg3, arg4);
 }
 
 export function InsertTransaction(arg1) {

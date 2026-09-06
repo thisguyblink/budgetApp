@@ -1,4 +1,6 @@
 <script>
+    import {GetCategoryTotals} from "../../wailsjs/go/main/App.js";
+
     let estimatedMonthlyIncome
     let currentMonthlyIncome
     let totalInvestments

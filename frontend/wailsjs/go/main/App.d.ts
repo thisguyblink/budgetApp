@@ -4,11 +4,13 @@ import {main} from '../models';
 
 export function ClearTransactionsTable():Promise<void>;
 
-export function GetCategoryTotals():Promise<Record<string, number>>;
+export function GetCategoryTotals(arg1:number,arg2:number,arg3:number,arg4:number):Promise<Record<string, number>>;
 
 export function GetTotalSpending():Promise<number>;
 
 export function GetTransactions():Promise<Array<main.Transaction>>;
+
+export function GetTransactionsRange(arg1:number,arg2:number,arg3:number,arg4:number):Promise<Array<main.Transaction>>;
 
 export function InsertTransaction(arg1:main.Transaction):Promise<void>;
 

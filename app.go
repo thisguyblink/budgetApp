@@ -15,6 +15,14 @@ import (
 var dbCon *sql.DB
 var err error
 var totalSpending float64
+var ignoreCategory = map[string]bool{
+	"Buy":                 true,
+	"Credit Card Payment": true,
+	"Federal Tax":         true,
+	"Fees & Charges":      true,
+	"Transfer":            true,
+	"Income":              true,
+}
 
 // App struct
 type App struct {
@@ -117,17 +125,21 @@ func (a *App) ParseTransactionsRange(after string, before string) ([]Transaction
 
 }
 
-func (a *App) GetCategoryTotals() (map[string]float64, error) {
-	totalSpending = 0
-	ignoreCategory := map[string]bool{
-		"Buy":                 true,
-		"Credit Card Payment": true,
-		"Federal Tax":         true,
-		"Fees & Charges":      true,
-		"Transfer":            true,
-		"Income":              true,
+func (a *App) GetCategoryTotals(startMonth int, startYear int, endMonth int, endYear int) (map[string]float64, error) {
+	// if all 0,0,0,0, then pull all Transactions
+	var transactions []Transaction
+	if startMonth == 0 && endMonth == 0 {
+		transactions, err = a.GetTransactions()
+	} else {
+		transactions, err = a.GetTransactionsRange(startMonth, startYear, endMonth, endYear)
 	}
-	transactions, err := a.GetTransactions()
+	if err != nil || len(transactions) == 0 {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	totalSpending = 0
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to get transactions: %w", err)
 	}
@@ -140,8 +152,8 @@ func (a *App) GetCategoryTotals() (map[string]float64, error) {
 		groupInfo[transaction.Category] += transaction.Amount
 		totalSpending += transaction.Amount
 	}
-
 	return groupInfo, nil
+
 }
 
 func (a *App) GetTotalSpending() float64 {

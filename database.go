@@ -99,6 +99,40 @@ func (a *App) GetTransactions() ([]Transaction, error) {
 	return transactions, rows.Err()
 }
 
+func (a *App) GetTransactionsRange(startMonth int, startYear int, endMonth int, endYear int) ([]Transaction, error) {
+	startDate := time.Date(startYear, time.Month(startMonth), 1, 0, 0, 0, 0, time.UTC)
+
+	endMonthNorm := time.Month(endMonth) + 1
+	endYearNorm := endYear
+	if endMonthNorm > 12 {
+		endMonthNorm = 1
+		endYearNorm++
+	}
+	endDateExclusive := time.Date(endYearNorm, endMonthNorm, 30, 0, 0, 0, 0, time.UTC)
+
+	rows, err := dbCon.QueryContext(a.ctx,
+		`SELECT date, description, category, amount 
+         FROM transactions 
+         WHERE date >= ? AND date < ?
+         ORDER BY date`,
+		startDate, endDateExclusive,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var transactions []Transaction
+	for rows.Next() {
+		var t Transaction
+		if err := rows.Scan(&t.Date, &t.Description, &t.Category, &t.Amount); err != nil {
+			return nil, err
+		}
+		transactions = append(transactions, t)
+	}
+	return transactions, rows.Err()
+}
+
 func (a *App) ClearTransactionsTable() error {
 	_, err := dbCon.ExecContext(a.ctx,
 		`DELETE FROM Transactions`,
